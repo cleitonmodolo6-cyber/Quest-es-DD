@@ -1,0 +1,443 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulado — Direito Disciplinar PMPR</title>
+<style>
+  :root{
+    --azul:#1a3a5c; --azul2:#2e5f8a; --dourado:#c9a227;
+    --verde:#1e7a3c; --vermelho:#b3261e; --cinza:#f4f6f9;
+  }
+  *{box-sizing:border-box}
+  body{
+    font-family:'Segoe UI',Roboto,Arial,sans-serif;
+    margin:0; background:linear-gradient(160deg,#e9eef5,#f7f9fc);
+    color:#1c2733; line-height:1.55;
+  }
+  header{
+    background:linear-gradient(135deg,var(--azul),var(--azul2));
+    color:#fff; padding:32px 20px; text-align:center;
+    border-bottom:5px solid var(--dourado);
+  }
+  header h1{margin:0 0 6px; font-size:1.7rem; letter-spacing:.5px}
+  header p{margin:0; opacity:.85; font-size:.95rem}
+  .container{max-width:900px; margin:0 auto; padding:24px 16px 80px}
+
+  .progress-wrap{
+    position:sticky; top:0; z-index:50;
+    background:#fff; border-radius:12px; padding:14px 18px;
+    box-shadow:0 4px 14px rgba(0,0,0,.08);
+    margin-bottom:22px;
+    display:flex; align-items:center; gap:14px; flex-wrap:wrap;
+  }
+  .bar{flex:1; min-width:140px; height:12px; background:#e3e8ef; border-radius:10px; overflow:hidden}
+  .bar span{display:block; height:100%; width:0; background:linear-gradient(90deg,var(--dourado),#e8c96a); transition:width .35s}
+  .progress-wrap b{color:var(--azul)}
+  .score{font-weight:700; color:var(--azul); white-space:nowrap}
+
+  .q-card{
+    background:#fff; border-radius:14px; padding:22px 22px 18px;
+    margin-bottom:20px; box-shadow:0 3px 12px rgba(0,0,0,.06);
+    border-left:5px solid var(--azul2);
+    animation:fade .4s ease;
+  }
+  @keyframes fade{from{opacity:0; transform:translateY(8px)} to{opacity:1; transform:none}}
+  .q-head{display:flex; justify-content:space-between; align-items:flex-start; gap:10px; margin-bottom:10px}
+  .q-num{
+    background:var(--azul); color:#fff; font-size:.78rem; font-weight:700;
+    padding:4px 10px; border-radius:20px; white-space:nowrap;
+  }
+  .tag{
+    font-size:.72rem; background:#eef3f9; color:var(--azul2);
+    padding:3px 9px; border-radius:20px; border:1px solid #d7e2ee;
+  }
+  .q-text{font-size:1.02rem; margin:8px 0 16px; font-weight:600}
+  .q-text small{display:block; font-weight:400; color:#5a6b7d; margin-top:4px}
+
+  .alt{
+    display:flex; gap:12px; align-items:flex-start;
+    border:2px solid #e3e8ef; border-radius:10px;
+    padding:12px 14px; margin-bottom:10px; cursor:pointer;
+    transition:.18s; background:#fff;
+  }
+  .alt:hover{border-color:var(--azul2); background:#f7fafd}
+  .alt .letter{
+    width:28px; height:28px; flex:0 0 28px; border-radius:50%;
+    background:#eef3f9; color:var(--azul); font-weight:700;
+    display:flex; align-items:center; justify-content:center; font-size:.85rem;
+  }
+  .alt.sel{border-color:var(--azul); background:#eaf2fb}
+  .alt.sel .letter{background:var(--azul); color:#fff}
+  .alt.correct{border-color:var(--verde); background:#e8f6ec}
+  .alt.correct .letter{background:var(--verde); color:#fff}
+  .alt.wrong{border-color:var(--vermelho); background:#fdecea}
+  .alt.wrong .letter{background:var(--vermelho); color:#fff}
+  .alt.locked{cursor:default}
+  .alt.locked:hover{background:inherit}
+
+  /* V/F */
+  .vf-row{display:flex; gap:12px; margin-bottom:12px; align-items:stretch}
+  .vf-btn{
+    flex:1; padding:14px; border:2px solid #e3e8ef; border-radius:10px;
+    background:#fff; cursor:pointer; font-weight:700; font-size:1.05rem;
+    transition:.18s; color:var(--azul);
+  }
+  .vf-btn:hover{border-color:var(--azul2); background:#f7fafd}
+  .vf-btn.sel{background:var(--azul); color:#fff; border-color:var(--azul)}
+  .vf-btn.correct{background:var(--verde); color:#fff; border-color:var(--verde)}
+  .vf-btn.wrong{background:var(--vermelho); color:#fff; border-color:var(--vermelho)}
+  .vf-btn.locked{cursor:default}
+  .vf-text{flex:3; padding:6px 0; font-size:.97rem}
+
+  .feedback{
+    margin-top:14px; padding:14px 16px; border-radius:10px;
+    font-size:.93rem; display:none;
+  }
+  .feedback.show{display:block; animation:fade .3s}
+  .feedback.ok{background:#e8f6ec; border-left:4px solid var(--verde)}
+  .feedback.no{background:#fdecea; border-left:4px solid var(--vermelho)}
+  .feedback strong{display:block; margin-bottom:4px}
+
+  .btn{
+    background:var(--azul); color:#fff; border:none; border-radius:10px;
+    padding:14px 26px; font-size:1rem; font-weight:700; cursor:pointer;
+    transition:.2s; box-shadow:0 4px 12px rgba(26,58,92,.25);
+  }
+  .btn:hover{background:var(--azul2); transform:translateY(-1px)}
+  .btn:disabled{opacity:.5; cursor:not-allowed; transform:none}
+  .btn-outline{background:#fff; color:var(--azul); border:2px solid var(--azul); box-shadow:none}
+  .btn-outline:hover{background:#eef3f9}
+
+  .actions{display:flex; gap:12px; flex-wrap:wrap; margin:10px 0 30px}
+
+  .result{
+    background:linear-gradient(135deg,#fff,#f0f5fa);
+    border:2px solid var(--dourado); border-radius:16px;
+    padding:30px 24px; text-align:center; display:none;
+    box-shadow:0 8px 26px rgba(0,0,0,.1);
+  }
+  .result.show{display:block; animation:fade .5s}
+  .result h2{color:var(--azul); margin:0 0 10px}
+  .big{font-size:3rem; font-weight:800; color:var(--dourado); line-height:1}
+  .result p{margin:10px 0; color:#3c4c5d}
+  .stats{display:flex; justify-content:center; gap:24px; flex-wrap:wrap; margin:18px 0}
+  .stat{background:#fff; border-radius:12px; padding:14px 22px; box-shadow:0 2px 8px rgba(0,0,0,.06); min-width:110px}
+  .stat b{display:block; font-size:1.5rem; color:var(--azul)}
+  .stat span{font-size:.8rem; color:#5a6b7d}
+  .mention{font-size:1.15rem; font-weight:700; color:var(--verde); margin-top:8px}
+  .mention.low{color:var(--vermelho)}
+  .mention.mid{color:#c9a227}
+  footer{text-align:center; padding:20px; color:#7b8a9a; font-size:.82rem}
+  .hidden{display:none !important}
+</style>
+</head>
+<body>
+<header>
+  <h1>🎯 Simulado — Direito Disciplinar PMPR</h1>
+  <p>Lei 1.943/54 · Decreto 5.075/98 · RDE 4.346/02 · Lei 16.544/10 · Portarias CG</p>
+</header>
+
+<div class="container">
+  <div class="progress-wrap">
+    <div class="bar"><span id="barFill"></span></div>
+    <b id="progressTxt">0 / 0 respondidas</b>
+    <div class="score" id="scoreTxt">Acertos: 0</div>
+  </div>
+
+  <div id="quiz"></div>
+
+  <div class="actions">
+    <button class="btn" id="btnCorrigir" disabled>✅ Corrigir Simulado</button>
+    <button class="btn btn-outline" id="btnReiniciar">🔄 Reiniciar</button>
+  </div>
+
+  <div class="result" id="resultado">
+    <h2>Resultado Final</h2>
+    <div class="big" id="pct">0%</div>
+    <p id="resumo"></p>
+    <div class="stats">
+      <div class="stat"><b id="stAcertos">0</b><span>Acertos</span></div>
+      <div class="stat"><b id="stErros">0</b><span>Erros</span></div>
+      <div class="stat"><b id="stTotal">0</b><span>Total</span></div>
+    </div>
+    <div class="mention" id="mention"></div>
+  </div>
+</div>
+
+<footer>Material de revisão — uso didático. Gabaritos conforme o arquivo original.</footer>
+
+<script>
+/* ============ BANCO DE QUESTÕES ============ */
+const questoes = [
+  {
+    tipo:"mc",
+    tag:"Lei 1.943/1954 · Custódia",
+    enunciado:"Durante a folga, um Soldado da PMPR é preso em flagrante por crime comum por autoridade policial civil, que lavra o flagrante e o mantém na cela comum da delegacia por 3 dias. À luz da Lei Estadual nº 1.943/1954, a conduta da autoridade civil foi:",
+    alternativas:[
+      "Correta, pois em crimes comuns cometidos durante a folga cessa a prerrogativa de recolhimento em Unidade Militar.",
+      "Incorreta, pois, efetuada a prisão, a autoridade policial civil deve fazer a entrega do preso imediatamente à autoridade militar após a lavratura do flagrante.",
+      "Correta, desde que a cela comum esteja separada de presos já condenados por sentença transitada em julgado.",
+      "Incorreta, pois militares estaduais somente podem ser presos em flagrante delito se a infração for estritamente um crime militar."
+    ],
+    correta:1,
+    justificativa:"Art. 269, § 1º da Lei nº 1.943/1954: efetuada a prisão e lavrado o flagrante, a autoridade policial fará a entrega do preso imediatamente à autoridade militar."
+  },
+  {
+    tipo:"mc",
+    tag:"Decreto 5.075/1998 · Vedações",
+    enunciado:"O Cabo PM Silva, na ativa, constitui empresa de comércio de eletrônicos como sócio-administrador e passa a prestar segurança privada remunerada em um supermercado. Conforme o Decreto nº 5.075/1998:",
+    alternativas:[
+      "As duas condutas do militar são vedadas pelo regulamento ético da corporação.",
+      "O comércio é permitido nas folgas, mas a segurança privada exige autorização do Comandante-Geral.",
+      "Ambas as atividades são permitidas, desde que não coincidam com os turnos de serviço na PMPR.",
+      "A segurança privada é permitida a praças estáveis, sendo vedada apenas a participação comercial."
+    ],
+    correta:0,
+    justificativa:"Art. 7º, § 3º do Decreto nº 5.075/1998 veda exercer segurança privada e fazer parte de firmas comerciais ou nelas exercer função/emprego remunerado (admite-se apenas acionista/quotista sem gestão)."
+  },
+  {
+    tipo:"mc",
+    tag:"Lei 1.943/1954 · Deveres",
+    enunciado:"Nos termos do Art. 102 da Lei Estadual nº 1.943/1954, constituem deveres fundamentais do militar estadual, entre outros:",
+    alternativas:[
+      "Exercer com dedicação o comércio local nos períodos de licença e atuar em segurança privada nas folgas.",
+      "Acatar a autoridade civil e satisfazer, com pontualidade, os compromissos pecuniários assumidos.",
+      "Manifestar-se publicamente sobre assuntos de política partidária mediante postagens institucionais.",
+      "Prestar depoimento em processos disciplinares apenas quando devidamente remunerado por diárias."
+    ],
+    correta:1,
+    justificativa:"Art. 102, alíneas 'e' e 'f' da Lei nº 1.943/1954: é dever acatar a autoridade civil e satisfazer com pontualidade os compromissos pecuniários assumidos."
+  },
+  {
+    tipo:"mc",
+    tag:"Decreto 5.075/1998 · Uso da Força",
+    enunciado:"O Capítulo IV do Decreto Estadual nº 5.075/1998 disciplina a observância dos Direitos Humanos na atuação policial militar. Em relação ao emprego da força, o regulamento preconiza que:",
+    alternativas:[
+      "O uso da força é livremente discricionário para garantir a agilidade nas operações de rua.",
+      "Somente será permitido ao militar estadual o emprego da força quando tal se afigure estritamente necessária e na medida exigida para o cumprimento do seu dever.",
+      "A ordem escrita de um superior hierárquico justifica o emprego de tratamento desumano durante interrogatórios.",
+      "É permitido o uso de força proporcional para compelir o cidadão a confessar infrações administrativas."
+    ],
+    correta:1,
+    justificativa:"Art. 12 do Anexo do Decreto nº 5.075/1998: somente será permitido o emprego da força quando estritamente necessária e na medida exigida para o cumprimento do dever."
+  },
+  {
+    tipo:"mc",
+    tag:"Lei 16.544/2010 · Conflito de Processos",
+    enunciado:"Um Sargento (14 anos de serviço) e um Soldado (3 anos) praticam juntos grave transgressão. Com a redação dada pela Lei nº 22.211/2024, na hipótese de conflito entre ADL e Conselho de Disciplina:",
+    alternativas:[
+      "Deverá ser instaurada Apuração Disciplinar de Licenciamento (ADL) para ambos os envolvidos.",
+      "Deverão ser instaurados obrigatoriamente dois processos separados e sem qualquer conexão.",
+      "Havendo conflito entre Apuração Disciplinar de Licenciamento e Conselho de Disciplina, será instaurado Conselho de Disciplina.",
+      "O processo disciplinar deverá ser suspenso até que a praça mais nova complete 10 anos de serviço."
+    ],
+    correta:2,
+    justificativa:"Art. 4º, § 3º, inciso I da Lei nº 16.544/2010 (incluído pela Lei nº 22.211/2024): havendo conflito entre ADL e Conselho de Disciplina, instaura-se Conselho de Disciplina."
+  },
+  {
+    tipo:"mc",
+    tag:"Lei 16.544/2010 · Prazos",
+    enunciado:"De acordo com o Art. 15 da Lei Estadual nº 16.544/2010, o processo disciplinar (ADL, Conselho de Disciplina ou Conselho de Justificação) na PMPR deverá ser concluído no prazo regular de:",
+    alternativas:[
+      "20 dias úteis a contar de sua instauração.",
+      "30 dias corridos a contar da citação do acusado.",
+      "40 dias úteis, a contar da data de sua instauração, inclusive remessa do relatório.",
+      "60 dias úteis, vedada qualquer prorrogação ou sobrestamento."
+    ],
+    correta:2,
+    justificativa:"Art. 15 da Lei nº 16.544/2010: conclusão em 40 dias úteis a contar da instauração, inclusive remessa do relatório (prorrogável pelo Comandante-Geral por até 20 dias úteis)."
+  },
+  {
+    tipo:"mc",
+    tag:"Portaria CG 339/2006 · FATD",
+    enunciado:"Durante a instrução de um FATD, o Oficial encarregado indefere fundamentadamente pedido da defesa para inquirir 10 testemunhas irrelevantes, por considerá-lo manifestamente protelatório. Nos termos do Art. 12 da Portaria CG nº 339/2006, após a decisão:",
+    alternativas:[
+      "O processo vai direto para julgamento sem que o acusado possa se manifestar novamente.",
+      "O militar estadual acusado deverá ser cientificado da decisão, tendo então um novo prazo de 3 (três) dias úteis para defesa.",
+      "O acusado perde o direito de apresentar razões finais no processo.",
+      "O FATD é automaticamente anulado e convertido em Sindicância."
+    ],
+    correta:1,
+    justificativa:"Art. 12, § 1º da Portaria CG nº 339/2006: o acusado é cientificado do indeferimento e tem novo prazo de 3 dias úteis para defesa."
+  },
+  {
+    tipo:"mc",
+    tag:"Portaria CG 338/2006 · Sindicância",
+    enunciado:"A Portaria CG nº 338/2006 regula a elaboração de Sindicância na PMPR. Em relação à sua natureza e prazo de conclusão, assinale a alternativa correta:",
+    alternativas:[
+      "É um processo judicial acusatório com prazo de 15 dias corridos.",
+      "É um instrumento administrativo de caráter inquisitorial cujo prazo de conclusão é de 20 dias úteis a contar da autuação.",
+      "É um procedimento disciplinar punitivo direto com prazo de 30 dias corridos.",
+      "É um inquérito criminal com prazo de 10 dias úteis improrrogáveis."
+    ],
+    correta:1,
+    justificativa:"Arts. 1º e 13 da Portaria CG nº 338/2006: instrumento administrativo, caráter inquisitorial, prazo de 20 dias úteis da autuação (prorrogável por até 10 dias úteis)."
+  },
+  {
+    tipo:"mc",
+    tag:"Portaria CG 883/2022 · Inquérito Técnico",
+    enunciado:"A Portaria CG nº 883/2022 disciplina as normas do Inquérito Técnico (IT) na PMPR. O IT tem por finalidade precípua:",
+    alternativas:[
+      "Processar e julgar crimes militares cometidos por oficiais em serviços operacionais.",
+      "Apurar evento danoso envolvendo bem patrimonial permanente sob administração militar, produzindo elementos informativos e esclarecendo circunstâncias.",
+      "Apurar transgressões disciplinares de natureza leve cometidas por praças sem estabilidade.",
+      "Apurar especificamente desvios éticos em condutas particulares de policiais de folga."
+    ],
+    correta:1,
+    justificativa:"Art. 1º da Portaria CG nº 883/2022: IT é instrumento administrativo inquisitorial para apurar evento danoso envolvendo bem patrimonial permanente sob administração militar."
+  },
+  {
+    tipo:"mc",
+    tag:"Portarias CG 289/2026 e 813/2026",
+    enunciado:"Em patrulhamento, diante de injusta agressão, um policial efetua disparo de arma de fogo com munição letal, atingindo a perna do suspeito (lesão corporal), sem indícios de crime militar. Conforme o Art. 6º da Portaria CG nº 289/2026 (redação da Portaria CG nº 813/2026), a apuração será feita por meio de:",
+    alternativas:[
+      "Inquérito Técnico (IT).",
+      "Formulário de Apuração de Transgressão Disciplinar (FATD).",
+      "Sindicância.",
+      "Conselho de Disciplina."
+    ],
+    correta:2,
+    justificativa:"Art. 6º, § 4º da Portaria CG nº 289/2026 (inserido pela Portaria CG nº 813/2026): lesão corporal por arma de fogo com munição letal em intervenção policial → instaura-se sindicância."
+  },
+  {
+    tipo:"mc",
+    tag:"Portaria CG 289/2026 · Confronto Armado",
+    enunciado:"Uma equipe policial militar se envolve em confronto armado com resultado morte no interior do Estado. O Oficial CPU desloca-se ao local para assumir as providências de Polícia Judiciária Militar. De acordo com a Portaria CG nº 289/2026, é medida obrigatória sob responsabilidade do Oficial CPU e da Unidade:",
+    alternativas:[
+      "Recolher as armas utilizadas pelos policiais envolvidos e encaminhar a comunicação preliminar de ocorrência ao MPPR e COGER/PMPR em até 12 horas.",
+      "Liberar o local do crime imediatamente sem isolamento para não causar comoção social.",
+      "Permitir que os policiais envolvidos levem suas armas para casa para manutenção antes da perícia.",
+      "Encaminhar o relatório do confronto apenas à imprensa local no prazo de 24 horas."
+    ],
+    correta:0,
+    justificativa:"Arts. 3º e 4º da Portaria CG nº 289/2026: apreensão das armas para perícia e envio da comunicação preliminar ao MPPR e COGER em até 12 horas após o registro do fato."
+  },
+  {
+    tipo:"mc",
+    tag:"RDE 4.346/2002 · Transgressão",
+    enunciado:"O Regulamento Disciplinar do Exército (Decreto nº 4.346/2002 - RDE) estabelece regras sobre o conceito de transgressão e a relação entre as esferas cível, criminal e administrativa. Sobre o tema, é correto afirmar:",
+    alternativas:[
+      "Quando a conduta praticada estiver tipificada em lei como crime ou contravenção penal, não se caracterizará transgressão disciplinar.",
+      "A absolvição criminal por insuficiência de provas obriga o arquivamento automático do processo disciplinar.",
+      "É permitida a aplicação de duas penalidades disciplinares para uma única transgressão.",
+      "O concurso de crime e transgressão de mesma natureza exige duas punições administrativas somadas."
+    ],
+    correta:0,
+    justificativa:"Art. 14, § 1º do RDE: quando a conduta estiver tipificada em lei como crime ou contravenção penal, não se caracterizará transgressão disciplinar."
+  },
+  {
+    tipo:"mc",
+    tag:"RDE 4.346/2002 · Causas de Justificação",
+    enunciado:"No julgamento da transgressão disciplinar, a autoridade deve verificar a presença de causas de justificação que isentam o militar de punição. Constitui causa de justificação prevista no RDE:",
+    alternativas:[
+      "Ter sido a falta praticada em estado de embriaguez alcoólica voluntária.",
+      "O cometimento da infração para evitar mal maior ou em legítima defesa própria ou de outrem.",
+      "Estar o militar classificado no comportamento 'mau'.",
+      "A reincidência na mesma falta no prazo de 30 dias."
+    ],
+    correta:1,
+    justificativa:"Art. 18, incisos II e III do RDE: há causa de justificação quando a transgressão é cometida em legítima defesa (própria ou de outrem) ou em obediência a ordem superior, entre outras hipóteses."
+  },
+  {
+    tipo:"mc",
+    tag:"Decreto 5.075/1998 · Gravidade Ética",
+    enunciado:"Em relação à gravidade das violações dos preceitos e deveres éticos, o Decreto Estadual nº 5.075/1998 estabelece em seu Art. 8º, § 2º que:",
+    alternativas:[
+      "A sanção ética é idêntica para todos os militares, independentemente da função.",
+      "A violação dos preceitos será tão mais grave quanto mais elevado for o grau hierárquico de quem a cometer.",
+      "As praças respondem com maior gravidade ética do que os oficiais superiores.",
+      "A violação ética praticada por militar inativo é isenta de qualquer julgamento ou registro."
+    ],
+    correta:1,
+    justificativa:"Art. 8º, § 2º do Anexo do Decreto nº 5.075/1998: a violação dos preceitos será tão mais grave quanto mais elevado for o grau hierárquico de quem a cometer."
+  },
+  {
+    tipo:"mc",
+    tag:"Lei 1.943/1954 · Matrimônio",
+    enunciado:"A Lei Estadual nº 1.943/1954 traz regramento específico quanto ao matrimônio do militar estadual em seu Art. 111. Sobre este ato, a lei estabelece que:",
+    alternativas:[
+      "Tanto oficiais quanto praças necessitam de autorização prévia por escrito do Governador.",
+      "O oficial em atividade que contrair matrimônio comunicará o fato ao Comando-Geral no prazo de 10 dias; já a praça só poderá assumir tal compromisso mediante prévia autorização.",
+      "É vedado o casamento de praças antes de completarem 10 anos de efetivo serviço.",
+      "O matrimônio de militares independe de qualquer comunicação ou autorização no âmbito da corporação."
+    ],
+    correta:1,
+    justificativa:"Art. 111, caput e parágrafo único da Lei nº 1.943/1954: o oficial comunica o matrimônio ao Comando-Geral em 10 dias (exibindo certidão); a praça só pode assumir o compromisso mediante prévia autorização do mesmo Comando."
+  },
+  {
+    tipo:"mc",
+    tag:"Portaria CG 339/2006 · Recursos",
+    enunciado:"Na PMPR, a Portaria CG nº 339/2006 (redação da Portaria CG nº 1.125/2013) alterou a dinâmica dos recursos disciplinares decorrentes do FATD. O Art. 18-A estabelece que a reconsideração de ato e o subsequente recurso disciplinar terão:",
+    alternativas:[
+      "Apenas efeito devolutivo.",
+      "Efeitos devolutivo e suspensivo.",
+      "Apenas efeito meramente homologatório.",
+      "Efeito exclusivo de anulação do processo."
+    ],
+    correta:1,
+    justificativa:"Art. 18-A da Portaria CG nº 339/2006: a reconsideração de ato e o subsequente recurso disciplinar decorrente de sanção aplicada terão efeitos devolutivo e suspensivo."
+  },
+  {
+    tipo:"mc",
+    tag:"Portaria CG 883/2022 · Sobrestamento",
+    enunciado:"O encarregado de um Inquérito Técnico instaurado para apurar avarias em equipamento permanente da PMPR solicita sobrestamento, pois aguarda laudos periciais externos indispensáveis que demorarão alguns meses. Nos termos da Portaria CG nº 883/2022:",
+    alternativas:[
+      "A autoridade instauradora pode determinar o sobrestamento, devendo elaborar a solução em até dois anos a contar da data do fato nos casos de pendência de documentos.",
+      "O sobrestamento é proibido e o encarregado deve ser punido disciplinarmente em 5 dias.",
+      "O processo deve ser arquivado imediatamente sem possibilidade de reabertura.",
+      "O sobrestamento prorroga o IT por no máximo 48 horas."
+    ],
+    correta:0,
+    justificativa:"Arts. 13 e 34, parágrafo único da Portaria CG nº 883/2022: a autoridade pode determinar o sobrestamento e, em caso de pendência de diligências/documentos, elaborar a solução em até dois anos a contar da data do fato."
+  },
+  {
+    tipo:"mc",
+    tag:"Lei 16.544/2010 · ADL",
+    enunciado:"A Apuração Disciplinar de Licenciamento (ADL), regulada no Título II da Lei Estadual nº 16.544/2010, é o processo disciplinar específico destinado a:",
+    alternativas:[
+      "Julgar a capacidade de Oficiais Superiores para permanecerem no serviço ativo.",
+      "Julgar a capacidade de praça ativa ou inativa, com menos de 10 (dez) anos de serviço prestados à Corporação na data do fato, para permanecer nas fileiras da PMPR.",
+      "Processar e julgar praças estáveis com mais de 20 anos de serviço em casos de crimes dolosos.",
+      "Substituir a sindicância em apurações de acidentes com viaturas."
+    ],
+    correta:1,
+    justificativa:"Art. 4º, inciso I da Lei nº 16.544/2010: ADL julga a capacidade de praça ativa ou inativa com menos de 10 anos de serviços prestados à Corporação, na data do fato, para permanecer nas fileiras da PMPR."
+  },
+  {
+    tipo:"mc",
+    tag:"Decreto 5.075/1998 · Manifestações Coletivas",
+    enunciado:"Três Soldados da ativa elaboram manifesto público assinado, postando em redes sociais críticas severas às decisões de superiores e exigindo reajustes salariais. Analisando a conduta sob a ótica do Decreto nº 5.075/1998 e da Lei nº 1.943/1954:",
+    alternativas:[
+      "É conduta atípica, pois a liberdade de expressão em redes sociais é um direito absoluto de todos os cidadãos.",
+      "A conduta viola os deveres éticos, sendo proibidas aos militares da ativa manifestações individuais ou coletivas sobre atos de superiores, de caráter reivindicatório ou político-partidário.",
+      "A conduta é permitida desde que a postagem seja feita fora das instalações do Batalhão.",
+      "A manifestação só seria ilícita se contivesse mais de 50 assinaturas de praças."
+    ],
+    correta:1,
+    justificativa:"Art. 7º, § 5º do Decreto nº 5.075/1998: proíbe expressamente aos militares da ativa quaisquer manifestações individuais ou coletivas sobre atos de superiores, de caráter reivindicatório ou político-partidário."
+  },
+  {
+    tipo:"mc",
+    tag:"Portaria CG 338/2006 · Publicação da Solução",
+    enunciado:"Conforme estabelece o Art. 25 da Portaria CG nº 338/2006, a solução da Sindicância exarada pela autoridade competente deverá ser publicada em boletim ostensivo no prazo de:",
+    alternativas:[
+      "3 dias úteis a contar do término das diligências.",
+      "8 dias úteis, contados do recebimento dos autos pela autoridade competente (podendo ser no dobro do prazo quando instaurada pelo Comandante-Geral).",
+      "15 dias corridos a contar da data de autuação do processo.",
+      "30 dias úteis obrigatoriamente em boletim reservado."
+    ],
+    correta:1,
+    justificativa:"Art. 25, caput e § 1º da Portaria CG nº 338/2006: publicação em boletim no prazo de 8 dias úteis contados do recebimento dos autos (dobrado quando instaurada pelo Comandante-Geral)."
+  },
+  /* ---------- V/F Nº 1 ---------- */
+  {
+    tipo:"vf-grupo",
+    tag:"V/F 1 · Ética, Deveres e Normas Gerais",
+    enunciado:"Julgue os 10 itens abaixo como Verdadeiro (V) ou Falso (F). Tema: Lei 1.943/1954, Decreto 5.075/1998 e RDE (Decreto 4.346/2002).",
+    itens:[
+      {texto:"O militar estadual do serviço ativo da PMPR pode exercer livremente o comércio e ser sócio-administrador de empresa comercial em seus horários de folga.", resp:false,
+       just:"Art. 107 da Lei nº 1.943/1954 e Art. 7º, § 3º do Decreto nº 5.075/1998 vedam ao militar da ativa fazer parte de firma comercial ou exercer gerência/administração."},
+      {texto:"O Sentimento do Dever Militar consiste no envolvimento e na tomada de consciência perante o caso concreto, implicando o reconhecimento da obrigatoriedade de um comportamento militar coerente e justo.", resp:true,
+       just:"Definição exata contida no Art. 4º
